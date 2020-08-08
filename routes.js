@@ -39,8 +39,21 @@ router.get('/:qID', (req, res) => {
 // Route for creating questions
 router.post('/', (req, res) => {
   const question = new Question(req.body);
+
   question.save((err, question, next) => {
     if (err) return next(err);
+    question.categories.forEach(async category => {
+      console.log('category', category);
+      const newCategory = await Category.findOneAndUpdate(
+        { name: category.name },
+        { $setOnInsert: { name: category.name }},
+        {
+          returnOriginal: false,
+          upsert: true,
+          useFindAndModify: false
+        }
+      );
+    });
     res.status(201);
     res.json(question);
   });
