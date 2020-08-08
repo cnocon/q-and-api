@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const Question = require('./models/question').Question;
+const Category = require('./models/question').Category;
 
 // Callback  to execute when qID is present
 router.param('qID', function(req, res, next, id) {
@@ -43,6 +44,22 @@ router.post('/', (req, res) => {
     res.status(201);
     res.json(question);
   });
+});
+
+// POST /:qID/categories
+// Route for creating categories on a question
+router.post('/:qID/categories', async (req, res, next) => {
+  const category = await Category.findOneAndUpdate(
+    { name: req.body.name },
+    { $setOnInsert: { name: req.body.name }},
+    {
+      returnOriginal: false,
+      upsert: true,
+      useFindAndModify: false
+    }
+  );
+  const newOrUpdated = category.value;
+  res.json(newOrUpdated);
 });
 
 

@@ -5,8 +5,6 @@ const express = require('express');
 const connectDb = require('./models').connectDb;
 const app = express();
 
-connectDb();
-
 const routes = require('./routes');
 
 const jsonParser = require('body-parser').json;
@@ -15,7 +13,9 @@ const logger = require('morgan');
 app.use(logger('dev'));
 app.use(jsonParser());
 
-const mongoose = require('mongoose');
+const db = connectDb.connection;
+
+// const mongoose = require('mongoose');
 
 // db.on('error', err => console.error("connection error:", err));
 // db.once("open", () => console.log('db connection successful'));

@@ -4,17 +4,24 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const shortid = require('shortid');
 
+const CategorySchema = new Schema({
+  _id: { type: String, default: shortid.generate },
+  name: String
+});
+
 const QuestionSchema = new Schema({
   _id: { type: String, default: shortid.generate },
   prompt: String,
-  categories: { type: Array, default: [] },
+  prompt_media: Array,
+  answer: String,
+  answer_media: Array,
   difficulty: Number,
-  gist: String,
-  snippet: String,
-  createdAt: { type: Date, default: Date.now },
-  answer: String
+  categories: [ CategorySchema ],
+  createdAt: { type: Date, default: Date.now }
 });
 
 const Question = mongoose.model("Question", QuestionSchema);
+const Category = mongoose.model("Category", CategorySchema);
 
+module.exports.Category = Category;
 module.exports.Question = Question;
