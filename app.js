@@ -1,39 +1,33 @@
 'use strict';
+const uri = process.env.MONGODB_URI;
 
 const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors')
 
-const connectDb = require('./models').connectDb;
 const app = express();
-
-const questionRoutes = require('./routes/questions');
-const categoryRoutes = require('./routes/categories');
 
 const jsonParser = require('body-parser').json;
 const logger = require('morgan');
 
 app.use(logger('dev'));
 app.use(jsonParser());
+// When adding user registrations I'll ask for their domains to whitelist
+// https://www.npmjs.com/package/cors
+app.use(cors());
 
-const db = connectDb.connection;
+mongoose.connect(uri, {
+  useNewUrlParser: true, 
+  useUnifiedTopology: true
+});
 
-// const mongoose = require('mongoose');
+const db = mongoose.connection;
 
-// db.on('error', err => console.error("connection error:", err));
-// db.once("open", () => console.log('db connection successful'));
+db.on('error', err => console.error("connection error:", err));
+db.once("open", () => console.log('db connection successful'));
 
-// // Configure pre-flight CORS 
-// app.use((req, res, next) => {
-//   // Any domain can make requests to this API
-//   res.header('Access-Control-Allow-Origin', '*');
-//   // Accepteable request headers
-//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-//   if (req.method = "OPTIONS") {
-//     res.header('Access-Control-Allow-Methods', 'PUT,POST,DELETE');
-//     return res.status(200).json({});
-//   }
-//   next();
-// });
-
+const questionRoutes = require('./routes/questions');
+const categoryRoutes = require('./routes/categories');
 
 app.use('/categories', categoryRoutes);
 app.use('/questions', questionRoutes);
