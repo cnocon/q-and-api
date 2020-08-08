@@ -4,13 +4,6 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const shortid = require('shortid');
 
-const CategorySchema = new Schema({
-  _id: { type: String, default: shortid.generate },
-  name: String,
-  slug: String,
-  questions: { type: Array, ref: 'Question', default: [] }
-});
-
 const QuestionSchema = new Schema({
   _id: { type: String, default: shortid.generate },
   prompt: String,
@@ -18,8 +11,16 @@ const QuestionSchema = new Schema({
   answer: String,
   answer_media: Array,
   difficulty: Number,
-  categories: [CategorySchema],
+  tags: Array,
   createdAt: { type: Date, default: Date.now }
+});
+
+// questions: { type: Array, ref: 'Question', default: [] }
+const CategorySchema = new Schema({
+  _id: { type: String, default: shortid.generate },
+  name: String,
+  slug: String,
+  questions: [QuestionSchema]
 });
 
 const Question = mongoose.model("Question", QuestionSchema);

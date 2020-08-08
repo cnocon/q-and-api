@@ -44,14 +44,14 @@ router.post('/', async (req, res, next) => {
   });
 });
 
-// POST /:qID/categories
-// Route for creating categories on a question
-router.post('/:qID/categories', async (req, res, next) => {
-  req.body.forEach(c => req.question.categories.push(c));
+// POST /:qID/tags
+// Route for creating tags on a question
+router.post('/:qID/tags', async (req, res, next) => {
+  req.body.forEach(c => req.question.tags.push(c));
   req.question.save(err => {
     if (err) return next(err);
     res.status(201);
-    res.json(req.question.categories);
+    res.json(req.question.tags);
   });
 });
 

@@ -3,6 +3,14 @@ const router = express.Router();
 const Category = require('../models/question').Category;
 const shortid = require('shortid');
 const { Question } = require('../models/question');
+// populates an array of objects
+// User.find(match, function (err, users) {
+//   var opts = [{ path: 'company', match: { x: 1 }, select: 'name' }];
+
+//   var promise = User.populate(users, opts);
+//   promise.then(console.log).end();
+// })
+
 
 // Callback  to execute when cID is present
 router.param('cID', function(req, res, next, id) {
@@ -20,8 +28,8 @@ router.param('cID', function(req, res, next, id) {
 
 // GET /categories
 // Route for categories collection
-router.get('/', (req, res, next) => {
-  Category.find({}, null, {}, (err, categories) => {
+router.get('/', async (req, res, next) => {
+  Category.find({}, null, (err, categories) => {
     if (err) return next(err);
     res.json(categories);
   });
@@ -33,7 +41,7 @@ router.get('/:cID/questions', async (req, res, next) => {
   Category
     .findOne({_id: req.params.cID})
     .populate({ 
-      path: 'questions', 
+      path: 'questions',
       model: Question
     }).exec((err, questions) => {
       if (err) return next(event);
@@ -53,11 +61,13 @@ router.post('/', (req, res, next) => {
   });
 });
 
-// POST /categories/:qID
+// POST /:cID/questions
+// Expects an array of question identifiers
 // Route for adding questions to a master category
-router.post('/:cID/questions', (req, res, next) => {
-  req.body.forEach(q_id => req.category.questions.push(q_id));
-  req.category.save(err => {
+router.post('/:cID/questions/:qID', async (req, res, next) => {
+  const question = await Question.findOne({_id: req.params.qID});
+  req.category.questions.push(question);
+  req.category.save(async err => {
     if (err) return next(err);
     res.status(201);
     res.json(req.category);
