@@ -38,25 +38,55 @@ router.get('/:qID', (req, res) => {
 
 // POST /questions
 // Route for creating questions
-router.post('/', (req, res) => {
-  const question = new Question(req.body);
-
-  question.save((err, question, next) => {
-    if (err) return next(err);
-    question.categories.forEach(async category => {
-      const newCategory = await Category.findOneAndUpdate(
-        { _id: category._id || shortid.generate() },
-        { $setOnInsert: { name: category.name }},
-        {
-          returnOriginal: false,
-          upsert: true,
-          useFindAndModify: false
-        }
-      );
-    });
-    res.status(201);
-    res.json(question);
+router.post('/', async (req, res, next) => {
+  const question = await new Question(req.body);
+  question.categories.forEach(cat => {
+    Category.findOneAndUpdate(
+      { name: cat.name  },
+      { $setOnInsert: { _id: cat._id || shortid.generate() } },
+      {
+        returnOriginal: false,
+        upsert: true,
+        useFindAndModify: false
+      }, (err, doc) => {
+        question.save((err, doc) => {
+          if (err) return next(err);
+          res.status(201);
+          res.json(doc);
+        });
+      }
+    );
+    
   });
+
+  
+
+  // question.save(async (err, q) => {
+  //   if (err) return next(err);
+
+  //   await Category.create(q.categories, (error, cat) => {
+  //     if (error) return next(error);
+
+  //     res.status(201);
+  //     res.json(q);
+  //   });
+
+    // question.categories.forEach(category => {
+    //   const found = Category.findById(category._id);
+      
+    //   if (!found) {
+    //     Category.findOneAndUpdate(
+    //       { _id: category._id || shortid.generate() },
+    //       { $setOnInsert: { name: category.name }},
+    //       {
+    //         returnOriginal: false,
+    //         upsert: true,
+    //         useFindAndModify: false
+    //       }
+    //     );
+    //   }
+    // });
+  // });
 });
 
 // POST /:qID/categories
