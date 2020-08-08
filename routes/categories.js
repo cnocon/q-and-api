@@ -18,6 +18,15 @@ router.param('cID', function(req, res, next, id) {
   });
 });
 
+// GET /categories
+// Route for categories collection
+router.get('/', (req, res, next) => {
+  Category.find({}, null, {}, (err, categories) => {
+    if (err) return next(err);
+    res.json(categories);
+  });
+});
+
 // GET /categories/:cID/questions
 // View all questions for a category
 router.get('/:cID/questions', async (req, res, next) => {
