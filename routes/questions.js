@@ -1,7 +1,7 @@
 const express = require('express');
+const { Category } = require('../models/question');
 const router = express.Router();
 const Question = require('../models/question').Question;
-const shortid = require('shortid');
 
 // Callback  to execute when qID is present
 router.param('qID', function(req, res, next, id) {
@@ -36,7 +36,17 @@ router.get('/:qID', (req, res) => {
 // POST /questions
 // Route for creating questions
 router.post('/', async (req, res, next) => {
-  const question = await new Question({_id: shortid.generate(), ...req.body});
+  const question = await new Question(req.body);
+  req.body.tags.forEach(tag => {
+    const cat = Category.find({name: tag});
+    if (cat.length) {
+      cat.questions.length ? cat.questions.push(...question) : cat.update({questions: [...question]});
+      cat.save((err, doc) => {
+        if (err) return next(err);
+      });
+    }
+  });
+
   question.save(err => {
     if (err) return next(err);
     res.status(201);

@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Category = require('../models/question').Category;
-const shortid = require('shortid');
 const { Question } = require('../models/question');
 // populates an array of objects
 // User.find(match, function (err, users) {
@@ -50,10 +49,16 @@ router.get('/:cID/questions', async (req, res, next) => {
     });
 });
 
+// GET /categories/:cID
+// View a single category
+router.get('/:cID', async (req, res, next) => {
+  res.json(req.category);
+});
+
 // POST to /categories route
 // Create a master category
 router.post('/', (req, res, next) => {
-  const cat = new Category({_id: shortid.generate(), ...req.body});
+  const cat = new Category(req.body);
   cat.save(err => {
     if (err) return next(err);
     res.status(201);
@@ -61,7 +66,7 @@ router.post('/', (req, res, next) => {
   });
 });
 
-// POST /:cID/questions
+// POST /:cID/questions/:qID
 // Expects an array of question identifiers
 // Route for adding questions to a master category
 router.post('/:cID/questions/:qID', async (req, res, next) => {
