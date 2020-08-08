@@ -1,6 +1,5 @@
 'use strict';
 
-
 const express = require('express');
 
 const connectDb = require('./models').connectDb;
