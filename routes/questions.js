@@ -1,9 +1,6 @@
-'use strict';
-
 const express = require('express');
 const router = express.Router();
-const Question = require('./models/question').Question;
-const Category = require('./models/question').Category;
+const Question = require('../models/question').Question;
 const shortid = require('shortid');
 
 // Callback  to execute when qID is present
@@ -39,72 +36,24 @@ router.get('/:qID', (req, res) => {
 // POST /questions
 // Route for creating questions
 router.post('/', async (req, res, next) => {
-  const question = await new Question(req.body);
-  question.categories.forEach(cat => {
-    Category.findOneAndUpdate(
-      { name: cat.name  },
-      { $setOnInsert: { _id: cat._id || shortid.generate() } },
-      {
-        returnOriginal: false,
-        upsert: true,
-        useFindAndModify: false
-      }, (err, doc) => {
-        question.save((err, doc) => {
-          if (err) return next(err);
-          res.status(201);
-          res.json(doc);
-        });
-      }
-    );
-    
+  const question = await new Question({_id: shortid.generate(), ...req.body});
+  question.save(err => {
+    if (err) return next(err);
+    res.status(201);
+    res.json(question);
   });
-
-  
-
-  // question.save(async (err, q) => {
-  //   if (err) return next(err);
-
-  //   await Category.create(q.categories, (error, cat) => {
-  //     if (error) return next(error);
-
-  //     res.status(201);
-  //     res.json(q);
-  //   });
-
-    // question.categories.forEach(category => {
-    //   const found = Category.findById(category._id);
-      
-    //   if (!found) {
-    //     Category.findOneAndUpdate(
-    //       { _id: category._id || shortid.generate() },
-    //       { $setOnInsert: { name: category.name }},
-    //       {
-    //         returnOriginal: false,
-    //         upsert: true,
-    //         useFindAndModify: false
-    //       }
-    //     );
-    //   }
-    // });
-  // });
 });
 
 // POST /:qID/categories
 // Route for creating categories on a question
 router.post('/:qID/categories', async (req, res, next) => {
-  const category = await Category.findOneAndUpdate(
-    { name: req.body.name },
-    { $setOnInsert: { name: req.body.name }},
-    {
-      returnOriginal: false,
-      upsert: true,
-      useFindAndModify: false
-    }
-  );
-  const newOrUpdated = category.value;
-  res.json(newOrUpdated);
+  req.body.forEach(c => req.question.categories.push(c));
+  req.question.save(err => {
+    if (err) return next(err);
+    res.status(201);
+    res.json(req.question.categories);
+  });
 });
-
 
 // PUT questions/:qID
 // Edit a specific question

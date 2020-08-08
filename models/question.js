@@ -6,7 +6,9 @@ const shortid = require('shortid');
 
 const CategorySchema = new Schema({
   _id: { type: String, default: shortid.generate },
-  name: String
+  name: String,
+  slug: String,
+  questions: { type: Array, ref: 'Question', default: [] }
 });
 
 const QuestionSchema = new Schema({
@@ -16,7 +18,7 @@ const QuestionSchema = new Schema({
   answer: String,
   answer_media: Array,
   difficulty: Number,
-  categories: [ CategorySchema ],
+  categories: [CategorySchema],
   createdAt: { type: Date, default: Date.now }
 });
 
