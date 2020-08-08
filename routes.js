@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const Question = require('./models/question').Question;
 const Category = require('./models/question').Category;
+const shortid = require('shortid');
 
 // Callback  to execute when qID is present
 router.param('qID', function(req, res, next, id) {
@@ -43,9 +44,8 @@ router.post('/', (req, res) => {
   question.save((err, question, next) => {
     if (err) return next(err);
     question.categories.forEach(async category => {
-      console.log('category', category);
       const newCategory = await Category.findOneAndUpdate(
-        { name: category.name },
+        { _id: category._id || shortid.generate() },
         { $setOnInsert: { name: category.name }},
         {
           returnOriginal: false,
