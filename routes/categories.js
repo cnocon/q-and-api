@@ -28,10 +28,19 @@ router.param('cID', function(req, res, next, id) {
 // GET /categories
 // Route for categories collection
 router.get('/', async (req, res, next) => {
-  Category.find({}, null, (err, categories) => {
-    if (err) return next(err);
-    res.json(categories);
-  });
+
+  if (req.query.property) {
+    const property = req.query.property;
+    Category.find({}, property, (err, categories) => {
+      if (err) return next(err);
+      res.json(categories);
+    });
+  } else {
+    Category.find({}, null, (err, categories) => {
+      if (err) return next(err);
+      res.json(categories);
+    });
+  }
 });
 
 // GET /categories/:cID/questions
