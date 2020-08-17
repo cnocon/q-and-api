@@ -36,18 +36,20 @@ router.get('/:qID', (req, res) => {
 // POST /questions
 // Route for creating questions
 router.post('/', async (req, res, next) => {
-  const question = await new Question(req.body);
-  req.body.tags.forEach(tag => {
-    const cat = Category.find({name: tag});
-    if (cat.length) {
-      cat.questions.length ? cat.questions.push(...question) : cat.update({questions: [...question]});
-      cat.save((err, doc) => {
-        if (err) return next(err);
-      });
-    }
-  });
+  const question = new Question(req.body);
+  if (req.body.tags && req.body.tags.length > 0) {
+    req.body.tags.forEach(tag => {
+      const cat = Category.find({name: tag});
+      if (cat.length) {
+        cat.questions.length ? cat.questions.push(...question) : cat.update({questions: [...question]});
+        cat.save((err, doc) => {
+          if (err) return next(err);
+        });
+      }
+    });
+  }
 
-  question.save(err => {
+  await question.save(err => {
     if (err) return next(err);
     res.status(201);
     res.json(question);
