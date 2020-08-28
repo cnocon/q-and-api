@@ -25,6 +25,7 @@ router.param('cID', function(req, res, next, id) {
   });
 });
 
+
 // GET /categories
 // Route for categories collection
 router.get('/', async (req, res, next) => {

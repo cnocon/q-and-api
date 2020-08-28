@@ -28,9 +28,40 @@ db.once("open", () => console.log('db connection successful'));
 
 const questionRoutes = require('./routes/questions');
 const categoryRoutes = require('./routes/categories');
+const Category = require('./models/question').Category;
+const { Question } = require('./models/question');
 
 app.use('/categories', categoryRoutes);
 app.use('/questions', questionRoutes);
+
+// GET /populated-categories
+// Route for categories collection
+app.get('/populated-categories', async (req, res, next) => {
+  Category.find({}, null, async (err, categories) => {
+    
+    if (err) return next(err);
+    req.payload = {};
+    categories.map((category, categoriesIndex) => {
+      console.log('categorieslength:', categories.length);
+      console.log('category name', category.name);
+      
+      Category.findOne({_id: category._id})
+      .populate({ 
+        path: 'questions',
+        model: Question
+      }).exec((err, questions) => {
+        if (err) return next(event);
+        req.payload[category.slug] = questions;
+
+        if (Object.keys(req.payload).length === categories.length) {
+          // We've populated all the categories
+          res.status(201);
+          res.json(req.payload);
+        }
+      });
+    });
+  });
+});
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
