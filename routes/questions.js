@@ -20,7 +20,7 @@ router.param('qID', function(req, res, next, id) {
 // GET /questions
 // Route for questions collection
 router.get('/', (req, res, next) => {
-  Question.find({}, null, {sort: {createdAt: -1}}, (err, questions) => {
+  Question.find({}, null, {sort: { difficulty: 1, createdAt: -1 } }, (err, questions) => {
     if (err) return next(err);
     res.json(questions);
   });

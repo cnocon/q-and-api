@@ -48,7 +48,8 @@ app.get('/populated-categories', async (req, res, next) => {
       Category.findOne({_id: category._id})
       .populate({ 
         path: 'questions',
-        model: Question
+        model: Question,
+        options: { sort: { 'difficulty': 1, 'createdAt': -1 } }
       }).exec((err, questions) => {
         if (err) return next(event);
         req.payload[category.slug] = questions;

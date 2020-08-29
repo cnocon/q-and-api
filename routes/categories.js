@@ -29,15 +29,14 @@ router.param('cID', function(req, res, next, id) {
 // GET /categories
 // Route for categories collection
 router.get('/', async (req, res, next) => {
-
   if (req.query.property) {
     const property = req.query.property;
-    Category.find({}, property, (err, categories) => {
+    Category.find({}, property, {sort: {name: 1} }, (err, categories) => {
       if (err) return next(err);
       res.json(categories);
     });
   } else {
-    Category.find({}, null, (err, categories) => {
+    Category.find({}, null, {sort: {name: 1}}, (err, categories) => {
       if (err) return next(err);
       res.json(categories);
     });
@@ -51,7 +50,8 @@ router.get('/:cID/questions', async (req, res, next) => {
     .findOne({_id: req.params.cID})
     .populate({ 
       path: 'questions',
-      model: Question
+      model: Question,
+      options: { sort: { 'difficulty': 1, 'createdAt': -1 } }
     }).exec((err, questions) => {
       if (err) return next(event);
       res.status(201);
