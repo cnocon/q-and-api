@@ -2,61 +2,42 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user').User;
 
-// Register a user
-router.post('/register', (req, res, next) => {
-  const { name, username, email, password, password_confirmation} = req.body;
-  
-  if (name && username && email && password && password_confirmation) {
-    if (password !== password_confirmation) {
-      const err = new Error('Passwords must match.');
-      err.status = 400;
-      return next(err);
-    } else {
-      const userData = {
-        name: name,
-        email: email,
-        username: username,
-        password: password
-      }
-      User.create(userData, (err, user) => {
-        if (err) {
-          return next(err);
-        } else {
-          return res.redirect('https://fed-flash-cards.netlify.app/');
-        }
-      })
+// Callback  to execute when qID is present
+router.param('userID', function(req, res, next, id) {
+  User.findById(id, (err, user) => {
+    if (err) return next(err);
+    if (!user) {
+      const error = new Error(`user with ID ${id} not found`);
+      error.status = 404;
+      return next(error);
     }
-  } else {
-    const err = new Error('All fields required.');
-    err.status = 400;
-    return next(err);
-  }
-  
-  
-})
-
-// Login a user
-router.post('/login', (req, res, next) => {
-  const { email, password } = req.body;
-
-  if (email && password) {
-    User.authenticate(email, password, function (error, user) {
-      if (error || !user) {
-        const err = new Error('Wrong email or password.');
-        err.status = 401;
-        return next(err);
-      } else {
-        res.status(201);
-        res.json(user);
-      }
-    });
-  } else {
-    const err = new Error('Email and password are required');
-    err.status = 401;
-    return next(err);
-  }
+    req.user = user;
+    next();
+  });
 });
 
+// GET /users
+// Route for questions collection
+router.get('/', (req, res, next) => {
+  User.find({}, null, {sort: { username: 1 } }, (err, users) => {
+    if (err) return next(err);
+    res.json(users);
+  });
+});
+
+
+// GET /users/:userID
+// Route for a specific question
+router.get('/:userID', (req, res) => {
+  // We set up middleware to load question onto req object when qID is a param (line 8)
+  res.json(req.user);
+});
+
+
+// GET a user
+router.get('/:id', (req, res, next) => {
+
+})
 
 
 module.exports = router;
