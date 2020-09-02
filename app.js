@@ -12,6 +12,7 @@ const logger = require('morgan');
 
 app.use(logger('dev'));
 app.use(jsonParser());
+app.use(express.urlencoded({ extended: true }))
 // When adding user registrations I'll ask for their domains to whitelist
 // https://www.npmjs.com/package/cors
 app.use(cors());
@@ -28,9 +29,13 @@ db.once("open", () => console.log('db connection successful'));
 
 const questionRoutes = require('./routes/questions');
 const categoryRoutes = require('./routes/categories');
+const userRoutes = require('./routes/users');
 const Category = require('./models/question').Category;
 const { Question } = require('./models/question');
+const { User } = require('./models/user');
 
+
+app.use('/users', userRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/questions', questionRoutes);
 
@@ -42,9 +47,6 @@ app.get('/populated-categories', async (req, res, next) => {
     if (err) return next(err);
     req.payload = {};
     categories.map((category, categoriesIndex) => {
-      console.log('categorieslength:', categories.length);
-      console.log('category name', category.name);
-      
       Category.findOne({_id: category._id})
       .populate({ 
         path: 'questions',
@@ -53,7 +55,6 @@ app.get('/populated-categories', async (req, res, next) => {
       }).exec((err, questions) => {
         if (err) return next(event);
         req.payload[category.slug] = questions;
-
         if (Object.keys(req.payload).length === categories.length) {
           // We've populated all the categories
           res.status(201);
@@ -79,6 +80,6 @@ app.use((err, req, res, next) => {
   })
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 app.listen(port, console.log(`Express server listening on port ${port}`));
