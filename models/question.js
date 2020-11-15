@@ -1,5 +1,3 @@
-'use strict';
-
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -10,10 +8,10 @@ const QuestionSchema = new Schema({
   answer_media: Array,
   difficulty: Number,
   tags: Array,
+  category_slug: String,
   createdAt: { type: Date, default: Date.now }
 });
 
-// questions: { type: Array, ref: 'Question', default: [] }
 const CategorySchema = new Schema({
   name: String,
   slug: String,
